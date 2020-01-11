@@ -1,7 +1,7 @@
 # calcul-parlamentare
 Calculator pentru numărul de mandate obținute de candidați în alegerile parlamentare, conform legii 208/2015
 
-python tally.py [mandate] [voturi]
+> python tally.py [mandate] [voturi]
 
 ##### Mandate
 Fișier .csv care conține numărul de mandate pe circumscripție, fiecare rând fiind sub forma
