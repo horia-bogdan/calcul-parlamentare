@@ -7,6 +7,7 @@ Calculator pentru numărul de mandate obținute de candidați în alegerile parl
 Fișier .csv care conține numărul de mandate pe circumscripție, fiecare rând fiind sub forma
 </br>
 [Circumscripție], [număr mandate] </br>
+</br>
 Vezi mandate_cdep.csv pentru exemplu
 
 ##### Voturi
@@ -28,6 +29,7 @@ sau
 -1 </br>
 ... </br>
 -1 </br>
+</br>
 Vezi cdep2016.csv pentru exemplu
 
 ##### Legea 208/2015 privind alegerea Senatului și Camerei Deputaților
