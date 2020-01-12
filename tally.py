@@ -216,7 +216,7 @@ def allocate_constituencies(votes, n_mandates):
                 print(independent + ": 1")
     print("Total mandate alocate: " + str(total))
     
-    return directly_allocated, remainders
+    return directly_allocated, redistribution
         
 mandates = read_mandates(sys.argv[1])
 votes = read_votes(sys.argv[2])
