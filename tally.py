@@ -59,8 +59,7 @@ def party_cull(votes):
             
         elif over_constituency_threshold[party] >= 4:
             remaining_parties.append(party)
-            print("Partidul " + party + " a trecut de pragul de circumscriptie în 4 circumscriptii")
-
+            pritn("Partidul " + party + " a trecut pragul de circumscriptie in 4 circumscriptii")
         else:
             print ("Partidul " + party + " nu a intrunit pragul si nu va fi considerat la alocarea mandatelor")
     
