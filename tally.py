@@ -7,13 +7,17 @@ CONSTITUENCY_THRESHOLD = 0.2
 
 DISPLAY_LEVEL = 1
 
+constituency_votes_total = 0
+
 def read_mandates(mandates_filename):
     mandates = []
+    constituency_names = []
     with open(mandates_filename) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
+            constituency_names.append(row[0])
             mandates.append(int(row[1]))
-    return mandates
+    return mandates, constituency_names
     
 def read_votes(filename):
     votes = []
@@ -90,6 +94,7 @@ def find_independents(votes):
     
 #constituency - dict   
 def allocate_direct(constituency, constituency_mandates, relevant_parties, independents):
+    global constituency_votes_total
     directly_allocated = {}
     remainders = {}
     remaining_mandates = constituency_mandates
@@ -112,6 +117,7 @@ def allocate_direct(constituency, constituency_mandates, relevant_parties, indep
         remaining_mandates -= allocated
         directly_allocated[party] = allocated
         remainders[party] = constituency[party] - allocated * electoral_coeff
+        constituency_votes_total += allocated * electoral_coeff
         if allocated > 0:
             print("Partidului " + party + " i-au fost alocate " + str(allocated) + " mandate prin alocare directa")
         
@@ -162,17 +168,17 @@ def redistribute_constituencies(remainders, remaining_mandates, remainders_sum, 
         repartitions_constituencies.append(repartition_constituency)
     
     repartitions.sort(key=lambda x : x[2], reverse=True)
-    #print("Lista sortata a repartitorilor la nivel national: ")
-    #for repartition in repartitions:
-        #print(repartition[0] + ", " + str(repartition[1] + 1) + ", " + str(repartition[2]))
-    #print("---------------------" + '\n')
+    print("Lista sortata a repartitorilor la nivel national: ")
+    for repartition in repartitions:
+        print(repartition[0] + ", " + str(repartition[1] + 1) + ", " + str(repartition[2]))
+    print("---------------------" + '\n')
 
     #print("Listele sortate ale repartitorilor la nivel de circumscriptie: ")
     for i in range(0, len(repartitions_constituencies)):
         repartitions_constituencies[i].sort(key=lambda x : x[2], reverse=True)
         #print("Circumscriptia " + str(i+1) + ": ")
         #for item in repartitions_constituencies[i]:
-            #print(item[0] + ", " + str(item[2]))
+        #    print(item[0] + ", " + str(item[2]))
         repartition_coeff = repartitions_constituencies[i][remaining_mandates[i]-1][2]
         repartition_coeffs.append(repartition_coeff)
 
@@ -188,18 +194,18 @@ def redistribute_constituencies(remainders, remaining_mandates, remainders_sum, 
     for repartition in repartitions:
         free_places = remaining_mandates[repartition[1]] - current_mandates_constituency[repartition[1]]
         if free_places < 1:
-            #print("Toate mandatele aferente circumscriptiei " + str(repartition[1]+1) + " au fost alocate!")
+            print(repartition[0] + ", Circumscriptia " + str(repartition[1]+1) + ": Toate mandatele aferente circumscriptiei au fost alocate!")
             continue
         mandates_left = redistribution[repartition[0]] - current_mandates_party[repartition[0]];
         if current_mandates_party[repartition[0]] >= redistribution[repartition[0]]:
-            #print("Toate mandatele aferente partidului " + repartition[0] + " au fost redistribuite!")
+            print(repartition[0] + ", Circumscriptia " + str(repartition[1]+1) + ": Toate mandatele aferente partidului au fost redistribuite!")
             continue
         mandates_to_allocate = min(math.floor(repartition[2]/repartition_coeffs[repartition[1]]), free_places)
         mandates_to_allocate = max(mandates_to_allocate, 1)
         current_mandates_party[repartition[0]] += mandates_to_allocate
         current_mandates_constituency[repartition[1]] += mandates_to_allocate
         redistributed_constituencies[repartition[1]][repartition[0]] = mandates_to_allocate
-        print(str(mandates_to_allocate) + " mandate au fost acordate partidului " + repartition[0] + " in circumscriptia " + str(repartition[1]+1))
+        print(str(mandates_to_allocate) + " mandate au fost acordate partidului " + repartition[0] + " in circumscriptia " + str(repartition[1]+1) + "(" + constituency_names[repartition[1]] + ") ")
 
     return redistributed_constituencies    
 
@@ -222,7 +228,7 @@ def allocate_constituencies(votes, n_mandates):
         constituency_remainders = {}
         remaining_mandates= 0
 
-        print("Circumscriptia " + str(i+1))
+        print("Circumscriptia " + str(i+1) + ": " + constituency_names[i])
         print("Numarul mandatelor disponibile este " + str(n_mandates[i]))
         process_constituency = allocate_direct(votes[i], n_mandates[i], relevant_parties, independents)
         
@@ -239,11 +245,12 @@ def allocate_constituencies(votes, n_mandates):
             print("voturi la redistribuire pentru " + party + ": " + str(constituency_remainders[party]))
             
         total_remaining_mandates += remaining_mandates
-        print(str(total_remaining_mandates) + " mandate nu au fost alocate si se vor redistribui national")
+        print(str(remaining_mandates) + " mandate nu au fost alocate si se vor redistribui national")
         print("---------------------" + '\n')
 
 
     print("Recapitulare alocare directa: ")
+    print("Voturi totale utilizate: " + str(constituency_votes_total))
     total = 0
     for party in relevant_parties:
         total_party = 0
@@ -288,7 +295,7 @@ def allocate_constituencies(votes, n_mandates):
     print("---------------------" + '\n')
     print("Redistribuire finală pe circumscriptii: " + '\n')
     for i in range(0, len(votes)):
-        print("Circumscriptia " + str(i+1))
+        print("Circumscriptia " + str(i+1) + ": " + constituency_names[i])
         print("Numărul mandate totale disponibile " + str(n_mandates[i]))
         for party in list(directly_allocated[i]):
             if directly_allocated[i][party] > 0:
@@ -301,7 +308,7 @@ def allocate_constituencies(votes, n_mandates):
     
     return directly_allocated, redistributed_mandates
         
-mandates = read_mandates(sys.argv[1])
+mandates, constituency_names = read_mandates(sys.argv[1])
 votes = read_votes(sys.argv[2])
 
 constituencies, redistributed = allocate_constituencies(votes, mandates)
