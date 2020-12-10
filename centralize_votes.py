@@ -48,7 +48,8 @@ names_cd = [
 "pv_final_cnty_cd_s4.csv",
 "pv_final_cnty_cd_s5.csv",
 "pv_final_cnty_cd_s6.csv",
-"pv_final_cnty_cd_sr.csv"]
+"pv_final_cnty_cd_sr.csv",
+"pv_final_cnty_cdc_sr.csv"]
 
 names_s = [
 "pv_final_cnty_s_ab.csv",
@@ -98,7 +99,8 @@ names_s = [
 "pv_final_cnty_s_s4.csv",
 "pv_final_cnty_s_s5.csv",
 "pv_final_cnty_s_s6.csv",
-"pv_final_cnty_s_sr.csv"]
+"pv_final_cnty_s_sr.csv",
+"pv_final_cnty_sc_sr.csv"]
 
 
 def add_candidates(names):
@@ -117,8 +119,10 @@ def add_data(candidates, names):
     data.append(candidates)
 
     constituency_BUC = {}
+    constituency_Diaspora = {}
     for candidate in candidates:
         constituency_BUC[candidate] = 0
+        constituency_Diaspora[candidate] = 0
 
     for name in names:
         constituency_data = {}
@@ -134,14 +138,20 @@ def add_data(candidates, names):
             if constituency_data[candidate] == 0:
                 if "INDEPENDENT" in candidate:
                     constituency_data[candidate] = -1
+
         should_append = False
         should_append_BUC = False
+        should_append_Diaspora = False
         for candidate in candidates:
             if "_s1" in name or "_s2" in name or "_s3" in name or "_s4" in name or "_s5" in name:
                 constituency_BUC[candidate] += constituency_data[candidate]
             elif "_s6" in name:
                 constituency_BUC[candidate] += constituency_data[candidate]
                 should_append_BUC = True
+            elif "_sr" in name:
+                constituency_Diaspora[candidate] += constituency_data[candidate]
+                if "c_sr" in name:
+                    should_append_Diaspora = True
             else:
                 should_append = True
         
@@ -149,6 +159,8 @@ def add_data(candidates, names):
             data.append(constituency_data.values())
         elif should_append_BUC:
             data.append(constituency_BUC.values())
+        elif should_append_Diaspora:
+            data.append(constituency_Diaspora.values())
     
 
     return data
